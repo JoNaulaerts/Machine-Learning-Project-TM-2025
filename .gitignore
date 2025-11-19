@@ -1,4 +1,6 @@
 Dataset_2_UK_Historic_Electricity_Demand_Data/Data
 Dataset_1_UK_Housing/Data
 .venv
-CloudAI/
+CloudAI
+Dataset_1_UK_Housing/Code/old_scripts_backup
+Dataset_1_UK_Housing/Code/docs
