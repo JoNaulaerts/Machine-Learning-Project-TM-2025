@@ -457,8 +457,8 @@ Housing transactions happen on specific days:
 
 **Why Seasonal Matters for Housing:**
 ```
-Spring (Mar-May):  PEAK season (families move before school)
-Summer (Jun-Aug):  High activity (good weather, summer holidays)
+Spring (Mar-May):  Moderate-high activity (spring market begins)
+Summer (Jun-Aug):  PEAK season (highest transaction volume in data)
 Autumn (Sep-Nov):  Moderate (back to school)
 Winter (Dec-Feb):  SLOW season (holidays, bad weather)
 ```
@@ -928,7 +928,7 @@ From **Chapter 3 (Model Quality)**:
 ### **3. Domain Knowledge Application** 🏠
 - ✅ UK housing market understanding (£10k-£5M range)
 - ✅ Economic theory (yield curve, interest rates)
-- ✅ Temporal patterns (spring surge, 2008 crisis)
+- ✅ Temporal patterns (summer peak Jun-Aug, 2008 crisis)
 - ✅ Real data only (Bank of England official statistics)
 
 **Grade: Expert-level** 🏆
