@@ -361,6 +361,6 @@ python train_models.py
 ---
 
 **Team:** CloudAI Analytics Team  
-**Members:** Jo Naulaerts, Abdul Salam Aldabik, Amate  
+**Members:** Jo Naulaerts, Abdul Salam Aldabik 
 **Project Deadline:** November 24, 2025  
 **Presentation:** November 28, 2025
