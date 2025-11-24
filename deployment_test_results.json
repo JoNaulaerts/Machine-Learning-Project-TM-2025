@@ -1,0 +1,138 @@
+{
+  "timestamp": "2025-11-24",
+  "total_tests": 7,
+  "passed": 6,
+  "failed": 1,
+  "pass_rate": 85.71428571428571,
+  "results": {
+    "github_workflow": {
+      "passed": true,
+      "details": {
+        "exists": true,
+        "valid_yaml": true,
+        "has_triggers": false,
+        "has_jobs": true,
+        "job_count": 3,
+        "jobs": [
+          "retrain-housing-model",
+          "retrain-electricity-model",
+          "deploy-notification"
+        ]
+      }
+    },
+    "docker_files": {
+      "passed": true,
+      "details": {
+        "files_exist": {
+          "Dockerfile.housing": true,
+          "Dockerfile.electricity": true,
+          "docker-compose.yml": true
+        },
+        "valid_syntax": {
+          "Dockerfile.housing": true,
+          "Dockerfile.electricity": true,
+          "docker-compose.yml": true
+        },
+        "has_required_commands": {
+          "Dockerfile.housing": [
+            "FROM",
+            "COPY",
+            "RUN",
+            "CMD"
+          ],
+          "Dockerfile.electricity": [
+            "FROM",
+            "COPY",
+            "RUN",
+            "CMD"
+          ]
+        }
+      }
+    },
+    "streamlit_apps": {
+      "passed": true,
+      "details": {
+        "exists": {
+          "Housing Price Prediction": true,
+          "Electricity Demand Forecasting": true
+        },
+        "has_streamlit_import": {
+          "Housing Price Prediction": true,
+          "Electricity Demand Forecasting": true
+        },
+        "has_main_function": {
+          "Housing Price Prediction": true,
+          "Electricity Demand Forecasting": true
+        },
+        "model_files_referenced": {
+          "Housing Price Prediction": true,
+          "Electricity Demand Forecasting": true
+        }
+      }
+    },
+    "deployment_docs": {
+      "passed": true,
+      "details": {
+        "exists": {
+          "DEPLOYMENT.md": true,
+          "CONTRIBUTING.md": true,
+          ".dockerignore": true,
+          "requirements.txt": true
+        },
+        "size_bytes": {
+          "DEPLOYMENT.md": 8251,
+          "CONTRIBUTING.md": 9153,
+          ".dockerignore": 864,
+          "requirements.txt": 2011
+        },
+        "has_content": {
+          "DEPLOYMENT.md": true,
+          "CONTRIBUTING.md": true,
+          ".dockerignore": true,
+          "requirements.txt": true
+        }
+      }
+    },
+    "github_templates": {
+      "passed": true,
+      "details": {
+        "exists": {
+          "PR Template": true,
+          "Bug Report": true,
+          "Feature Request": true
+        },
+        "has_checklist": {
+          "PR Template": true,
+          "Bug Report": true,
+          "Feature Request": true
+        }
+      }
+    },
+    "model_files": {
+      "passed": false,
+      "details": {
+        "dirs_exist": {
+          "Dataset 1 Models": true,
+          "Dataset 2 Models": true
+        },
+        "model_files": {
+          "Dataset 1 Models": [],
+          "Dataset 2 Models": []
+        },
+        "count": {
+          "Dataset 1 Models": 0,
+          "Dataset 2 Models": 0
+        }
+      }
+    },
+    "git_config": {
+      "passed": true,
+      "details": {
+        "is_git_repo": true,
+        "has_gitignore": true,
+        "remote_configured": true,
+        "branch": "main"
+      }
+    }
+  }
+}

@@ -1,0 +1,49 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+.venv/
+venv/
+ENV/
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Git
+.git/
+.gitignore
+
+# Project specific
+CloudAI/
+*.md
+!DEPLOYMENT.md
+.github/
+logs.log
+old_scripts_backup/
+docs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Large data files (include only essential data)
+Dataset_1_UK_Housing/Data/price_paid_records.csv
+Dataset_1_UK_Housing/Data/boe/
+Dataset_1_UK_Housing/Data/cleaning_analysis/
+Dataset_1_UK_Housing/Data/economic_output/
+Dataset_1_UK_Housing/Data/feature_analysis/
+Dataset_1_UK_Housing/Data/inspection_output/
+Dataset_1_UK_Housing/Data/loading_output/
+Dataset_1_UK_Housing/Data/merged_output/
+Dataset_2_UK_Historic_Electricity_Demand_Data/Data/demanddata_*.csv
+Dataset_2_UK_Historic_Electricity_Demand_Data/Output/
