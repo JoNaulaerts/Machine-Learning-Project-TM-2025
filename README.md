@@ -5,7 +5,6 @@
 ## Team Members:
 - Jo Naulaerts
 - Abdul Salam Aldabik
-- Amate (Third Member)
 
 ---
 
@@ -252,9 +251,8 @@ Features:
 ## 🤝 Contributing
 
 Team members:
-1. **Jo Naulaerts** - Project lead, Dataset coordination
-2. **Abdul Salam Aldabik** - Dataset 2 complete implementation, AWS setup
-3. **Amate** - Dataset 1 contributions
+1. **Jo Naulaerts** - Dataset 1 contributions, Dataset 2 contributions
+2. **Abdul Salam Aldabik** - Dataset 1 contributions, Dataset 2 contribution
 
 ---
 
