@@ -1,5 +1,5 @@
 # Dockerfile for UK Housing Price Prediction App
-FROM python:3.11.9-slim
+FROM python:3.11-slim
 
 WORKDIR /app
 
