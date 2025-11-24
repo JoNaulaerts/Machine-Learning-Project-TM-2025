@@ -1,0 +1,31 @@
+{
+  "electricity_models": [
+    {
+      "model": "XGBoost",
+      "rmse": 1118.5262906303224,
+      "mae": 888.1781952049904,
+      "r2": 0.919613178504926,
+      "timestamp": "2025-11-24T20:03:01.407563"
+    },
+    {
+      "model": "Gradient Boosting",
+      "rmse": 1081.2212556122847,
+      "mae": 861.2209806638897,
+      "r2": 0.9248858748115396,
+      "timestamp": "2025-11-24T20:03:05.547225"
+    }
+  ],
+  "training_samples": 13747,
+  "test_samples": 3437,
+  "features": [
+    "hour",
+    "day_of_week",
+    "month",
+    "day_of_year",
+    "week_of_year",
+    "demand_lag_1",
+    "demand_lag_2",
+    "demand_lag_48",
+    "demand_lag_336"
+  ]
+}
