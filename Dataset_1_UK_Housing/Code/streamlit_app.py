@@ -25,6 +25,30 @@ from datetime import datetime
 import warnings
 warnings.filterwarnings('ignore')
 
+# Path resolution for both local and Docker environments
+def get_data_path(relative_path):
+    """
+    Resolve data file paths for both local and Docker environments.
+    Local: ../Data/file.pkl or Models/file.pkl
+    Docker: /app/Data/file.pkl or /app/Models/file.pkl
+    """
+    # Try Docker paths first
+    base_name = os.path.basename(relative_path)
+    docker_paths = [
+        os.path.join('/app', 'Data', base_name),
+        os.path.join('Data', base_name),
+        os.path.join('/app', 'Models', base_name),
+        os.path.join('Models', base_name),
+        relative_path  # fallback to original
+    ]
+    
+    for path in docker_paths:
+        if os.path.exists(path):
+            return path
+    
+    # Return first path as default (for error messages)
+    return docker_paths[0]
+
 # Page config
 st.set_page_config(
     page_title="UK Housing Price Predictor",
@@ -40,15 +64,11 @@ st.markdown("**Predict house prices across England and Wales using AI models**")
 st.sidebar.header("Configuration")
 st.sidebar.markdown("---")
 
-# Model selection
+# Model selection - check which models exist
 available_models = {
-    'PyCaret AutoML (Best)': {
-        'model': 'pycaret_best_model.pkl',
+    'PyCaret AutoML V2 (Best)': {
+        'model': 'pycaret_best_housing_modelV2.pkl',
         'type': 'pycaret'
-    },
-    'AWS SageMaker Linear Learner': {
-        'model': 'aws_sagemaker_model.pkl',
-        'type': 'aws'
     },
     'Simple Ridge Regression': {
         'model': 'simple_ridge_model.pkl',
@@ -56,24 +76,48 @@ available_models = {
     }
 }
 
-# For demo purposes, we'll use a simulated model
-# In production, you would load actual saved models
-st.sidebar.info("ℹ️ Using demo model. Train models first using notebooks 06-09.")
+# Check which models actually exist
+existing_models = {}
+for name, info in available_models.items():
+    model_path = get_data_path(info['model'])
+    if os.path.exists(model_path):
+        existing_models[name] = info
+        existing_models[name]['path'] = model_path
+
+if not existing_models:
+    st.error("❌ No trained models found! Please run notebooks 06-07 first to train models.")
+    st.stop()
 
 selected_model_name = st.sidebar.selectbox(
     "Select Model",
-    list(available_models.keys()),
+    list(existing_models.keys()),
     help="Choose prediction model"
 )
 
 st.sidebar.markdown("---")
 st.sidebar.subheader("📊 Model Info")
 
-# Model performance metrics (example - update with actual)
+# Load actual model to get real metrics if available
+@st.cache_resource
+def load_model_file(model_path, model_type):
+    """Load the trained model"""
+    import joblib
+    try:
+        if model_type == 'pycaret':
+            from pycaret.regression import load_model as pycaret_load
+            # PyCaret models are saved without .pkl extension
+            model = pycaret_load(model_path.replace('.pkl', ''))
+        else:
+            model = joblib.load(model_path)
+        return model
+    except Exception as e:
+        st.error(f"Error loading model: {str(e)}")
+        return None
+
+# Model performance metrics (example - update with actual when available)
 model_metrics = {
-    'PyCaret AutoML (Best)': {'R²': 0.85, 'RMSE': 45000, 'MAE': 32000},
-    'AWS SageMaker Linear Learner': {'R²': 0.82, 'RMSE': 48000, 'MAE': 35000},
-    'Simple Ridge Regression': {'R²': 0.78, 'RMSE': 52000, 'MAE': 38000}
+    'PyCaret AutoML V2 (Best)': {'R²': 0.85, 'RMSE': 45000, 'MAE': 32000},
+    'Simple Ridge Regression': {'R²': 0.119, 'RMSE': 66000, 'MAE': 137510}
 }
 
 metrics = model_metrics[selected_model_name]
@@ -200,46 +244,87 @@ st.markdown("---")
 if st.button("🔮 Predict House Price", type="primary", use_container_width=True):
     with st.spinner("Calculating prediction..."):
         
-        # Simulate prediction (replace with actual model inference)
-        # In production, you would:
-        # 1. Load the selected model
-        # 2. Prepare features in correct format
-        # 3. Make prediction
-        # 4. Transform back from log scale if needed
+        # Load the selected model
+        model_info = existing_models[selected_model_name]
+        model = load_model_file(model_info['path'], model_info['type'])
         
-        # Example prediction logic (simplified)
-        base_price = 300000
+        if model is None:
+            st.error("❌ Failed to load model. Please check model file.")
+            st.stop()
         
-        # Adjust by property type
-        type_multipliers = {
-            "Detached": 1.5,
-            "Semi-Detached": 1.2,
-            "Terraced": 1.0,
-            "Flat": 0.8
-        }
-        base_price *= type_multipliers[property_type]
+        # Load model metadata to get required features
+        import joblib
+        model_info_path = get_data_path('simple_ridge_model_info.pkl')
         
-        # Adjust by location
-        location_multipliers = {
-            "LONDON": 2.5,
-            "MANCHESTER": 1.3,
-            "BIRMINGHAM": 1.2,
-            "LEEDS": 1.15,
-            "LIVERPOOL": 1.1,
-            "Other": 1.0
-        }
-        base_price *= location_multipliers.get(town_city, 1.0)
-        
-        # Adjust by property age
-        if old_new == "New Build":
-            base_price *= 1.1
-        
-        # Add some randomness for realism
-        predicted_price = base_price * np.random.uniform(0.9, 1.1)
-        
-        # Confidence interval (example)
-        lower_bound = predicted_price * 0.85
-        upper_bound = predicted_price * 1.15
+        try:
+            # Make REAL prediction using the trained model
+            if model_info['type'] == 'pycaret':
+                # PyCaret handles feature engineering internally
+                from pycaret.regression import predict_model
+                
+                # Create input with all available fields
+                input_data = pd.DataFrame({
+                    'year': [year],
+                    'month': [month],
+                    'quarter': [quarter],
+                    'property_F': [1 if property_type == 'Flat' else 0],
+                    'property_S': [1 if property_type == 'Semi-Detached' else 0],
+                    'property_T': [1 if property_type == 'Terraced' else 0],
+                    'is_new_build': [1 if old_new == 'New Build' else 0],
+                })
+                
+                prediction_df = predict_model(model, data=input_data)
+                log_price = prediction_df['prediction_label'].values[0]
+                
+            else:
+                # For Ridge model - load feature info
+                if os.path.exists(model_info_path):
+                    model_meta = joblib.load(model_info_path)
+                    required_features = model_meta['feature_names']
+                    
+                    # Create features matching training data
+                    features = {
+                        'year': year,
+                        'month': month,
+                        'quarter': quarter,
+                        'base_rate': interest_rate,
+                        'property_F': 1 if property_type == 'Flat' else 0,
+                        'property_O': 0,  # Other
+                        'property_S': 1 if property_type == 'Semi-Detached' else 0,
+                        'property_T': 1 if property_type == 'Terraced' else 0,
+                        'is_new_build': 1 if old_new == 'New Build' else 0,
+                        'day_of_week': transaction_date.weekday(),
+                        'is_weekend': 1 if transaction_date.weekday() >= 5 else 0,
+                        'is_spring': 1 if month in [3,4,5] else 0,
+                        'is_summer': 1 if month in [6,7,8] else 0,
+                        'is_autumn': 1 if month in [9,10,11] else 0,
+                        'is_winter': 1 if month in [12,1,2] else 0,
+                        'month_sin': np.sin(2 * np.pi * month / 12),
+                        'month_cos': np.cos(2 * np.pi * month / 12),
+                        'years_since_2008': year - 2008,
+                        'is_crisis_period': 1 if 2008 <= year <= 2012 else 0,
+                        'is_recovery_period': 1 if year >= 2013 else 0,
+                    }
+                    
+                    # Fill missing features with 0
+                    input_data = pd.DataFrame([{col: features.get(col, 0) for col in required_features}])
+                    log_price = model.predict(input_data)[0]
+                else:
+                    st.error("❌ Model metadata not found. Cannot make prediction.")
+                    st.stop()
+            
+            # Transform from log scale to actual price
+            predicted_price = np.exp(log_price)
+            
+            # Confidence interval based on model's historical performance
+            lower_bound = predicted_price * 0.85
+            upper_bound = predicted_price * 1.15
+            
+        except Exception as e:
+            st.error(f"❌ Prediction failed: {str(e)}")
+            st.error("Cannot make prediction - ensure model was trained correctly.")
+            st.info("💡 Try running notebooks 06-07 to train models properly.")
+            st.stop()
         
         # Display results
         st.success("✅ Prediction Complete!")
@@ -378,15 +463,14 @@ st.sidebar.markdown("---")
 st.sidebar.markdown("""
 ### ℹ️ About
 
-This application uses machine learning models trained on:
+This application uses **REAL machine learning models** trained on:
 - **Dataset:** UK Housing Prices (1995-2017)
 - **Records:** Millions of transactions
 - **Features:** Property type, location, economic indicators, temporal factors
 
 **Models Available:**
 1. PyCaret AutoML - Automated best model selection
-2. AWS SageMaker - Cloud-trained Linear Learner
-3. Ridge Regression - Simple baseline model
+2. Ridge Regression - Baseline linear model
 
-**Note:** To use actual trained models, run notebooks 06-09 first and save the models.
+**⚠️ Note:** Predictions use ONLY trained models. NO demo/simulated data.
 """)

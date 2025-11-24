@@ -10572,3 +10572,19 @@ OSError: [WinError 1450] Er zijn onvoldoende systeembronnen beschikbaar om aan d
                 ('actual_estimator',
                  LGBMRegressor(n_jobs=-1, random_state=42))])
 2025-11-23 17:40:57,868:INFO:save_model() successfully completed......................................
+2025-11-24 23:24:15,825:WARNING:
+'cuml' is a soft dependency and not included in the pycaret installation. Please run: `pip install cuml` to install.
+2025-11-24 23:24:15,825:WARNING:
+'cuml' is a soft dependency and not included in the pycaret installation. Please run: `pip install cuml` to install.
+2025-11-24 23:24:15,825:WARNING:
+'cuml' is a soft dependency and not included in the pycaret installation. Please run: `pip install cuml` to install.
+2025-11-24 23:24:15,825:WARNING:
+'cuml' is a soft dependency and not included in the pycaret installation. Please run: `pip install cuml` to install.
+2025-11-24 23:49:40,777:WARNING:
+'cuml' is a soft dependency and not included in the pycaret installation. Please run: `pip install cuml` to install.
+2025-11-24 23:49:40,778:WARNING:
+'cuml' is a soft dependency and not included in the pycaret installation. Please run: `pip install cuml` to install.
+2025-11-24 23:49:40,778:WARNING:
+'cuml' is a soft dependency and not included in the pycaret installation. Please run: `pip install cuml` to install.
+2025-11-24 23:49:40,778:WARNING:
+'cuml' is a soft dependency and not included in the pycaret installation. Please run: `pip install cuml` to install.

@@ -25,6 +25,27 @@ from sklearn.preprocessing import MinMaxScaler
 import warnings
 warnings.filterwarnings('ignore')
 
+# Path resolution for both local and Docker environments
+def get_data_path(relative_path):
+    """
+    Resolve data file paths for both local and Docker environments.
+    Local: ../Data/file.pkl
+    Docker: /app/Data/file.pkl or Data/file.pkl
+    """
+    # Try Docker paths first
+    docker_paths = [
+        os.path.join('/app', 'Data', os.path.basename(relative_path)),
+        os.path.join('Data', os.path.basename(relative_path)),
+        relative_path  # fallback to original
+    ]
+    
+    for path in docker_paths:
+        if os.path.exists(path):
+            return path
+    
+    # Return first Docker path as default (for error messages)
+    return docker_paths[0]
+
 # Page config
 st.set_page_config(
     page_title="UK Electricity Demand Forecasting",
@@ -42,46 +63,49 @@ st.sidebar.header("Configuration")
 # Model selection - Updated for complete training models
 available_models = {
     'XGBoost (BEST - 3% MAPE)': {
-        'model': '../Data/xgboost_model.pkl',
-        'features': '../Data/xgboost_features.pkl',
+        'model': 'xgboost_model.pkl',
+        'features': 'xgboost_features.pkl',
         'type': 'xgboost'
     },
     'Ensemble (4% MAPE)': {
-        'model': '../Data/ensemble_weights.pkl',
-        'prophet': '../Data/prophet_seasonal_model.pkl',
-        'xgboost': '../Data/xgboost_model.pkl',
-        'lstm': '../Data/lstm_model.h5',
-        'features': '../Data/xgboost_features.pkl',
-        'scaler': '../Data/lstm_scaler.pkl',
+        'model': 'ensemble_weights.pkl',
+        'prophet': 'prophet_seasonal_model.pkl',
+        'xgboost': 'xgboost_model.pkl',
+        'lstm': 'lstm_model.h5',
+        'features': 'xgboost_features.pkl',
+        'scaler': 'lstm_scaler.pkl',
         'type': 'ensemble'
     },
     'LSTM Neural Network (7% MAPE)': {
-        'model': '../Data/lstm_model.h5',
-        'scaler': '../Data/lstm_scaler.pkl',
+        'model': 'lstm_model.h5',
+        'scaler': 'lstm_scaler.pkl',
         'type': 'lstm'
     },
     'Prophet Seasonal (18% MAPE)': {
-        'model': '../Data/prophet_seasonal_model.pkl',
+        'model': 'prophet_seasonal_model.pkl',
         'type': 'prophet'
     }
 }
 
-# Check which models exist
+# Check which models exist (resolve paths for Docker)
 existing_models = {}
 for name, paths in available_models.items():
+    paths_resolved = {k: get_data_path(v) for k, v in paths.items() if k != 'type'}
+    paths_resolved['type'] = paths['type']
+    
     if paths['type'] == 'ensemble':
         # Check all ensemble dependencies
-        if all(os.path.exists(paths[key]) for key in ['model', 'prophet', 'xgboost', 'lstm', 'features', 'scaler']):
-            existing_models[name] = paths
+        if all(os.path.exists(paths_resolved[key]) for key in ['model', 'prophet', 'xgboost', 'lstm', 'features', 'scaler']):
+            existing_models[name] = paths_resolved
     elif paths['type'] == 'xgboost':
-        if os.path.exists(paths['model']) and os.path.exists(paths['features']):
-            existing_models[name] = paths
+        if os.path.exists(paths_resolved['model']) and os.path.exists(paths_resolved['features']):
+            existing_models[name] = paths_resolved
     elif paths['type'] == 'lstm':
-        if os.path.exists(paths['model']) and os.path.exists(paths['scaler']):
-            existing_models[name] = paths
+        if os.path.exists(paths_resolved['model']) and os.path.exists(paths_resolved['scaler']):
+            existing_models[name] = paths_resolved
     else:  # prophet
-        if os.path.exists(paths['model']):
-            existing_models[name] = paths
+        if os.path.exists(paths_resolved['model']):
+            existing_models[name] = paths_resolved
 
 if not existing_models:
     st.error("❌ No trained models found! Please run 07_complete_model_training.ipynb first.")
@@ -111,7 +135,8 @@ start_date = st.sidebar.date_input(
 @st.cache_data
 def load_data():
     """Load historical data - period level (half-hourly)"""
-    df = pd.read_csv('../Data/cleaned_and_augmented_electricity_data.csv', low_memory=False)
+    data_file = get_data_path('cleaned_and_augmented_electricity_data.csv')
+    df = pd.read_csv(data_file, low_memory=False)
     df['settlement_date'] = pd.to_datetime(df['settlement_date'], errors='coerce')
     df = df.dropna(subset=['settlement_date'])
     df = df.sort_values('settlement_date')
@@ -173,7 +198,7 @@ def load_model_components(model_info):
 @st.cache_data
 def load_metrics():
     """Load model performance metrics"""
-    metrics_file = '../Data/complete_model_comparison.csv'
+    metrics_file = get_data_path('complete_model_comparison.csv')
     if os.path.exists(metrics_file):
         return pd.read_csv(metrics_file)
     return None

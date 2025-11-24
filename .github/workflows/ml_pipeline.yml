@@ -378,15 +378,82 @@ jobs:
         docker images | grep -E "(housing|electricity)"
         echo "✅ Docker images ready for deployment"
 
-  deploy-streamlit-apps:
+  deploy-to-oracle-cloud:
     needs: [build-docker-images]
     runs-on: ubuntu-latest
-    name: Deploy Streamlit Applications
+    name: Deploy to Oracle Cloud
     
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
       
+    - name: Setup SSH Key
+      run: |
+        mkdir -p ~/.ssh
+        echo "${{ secrets.ORACLE_SSH_KEY }}" > ~/.ssh/oracle_key
+        chmod 600 ~/.ssh/oracle_key
+        ssh-keyscan -H ${{ secrets.ORACLE_HOST }} >> ~/.ssh/known_hosts
+        
+    - name: Deploy to Oracle VM
+      run: |
+        echo "🚀 Deploying to Oracle Cloud..."
+        
+        # Copy docker-compose and Dockerfiles to Oracle VM
+        scp -i ~/.ssh/oracle_key \
+          docker-compose.yml \
+          Dockerfile.housing \
+          Dockerfile.electricity \
+          requirements-docker.txt \
+          ${{ secrets.ORACLE_USER }}@${{ secrets.ORACLE_HOST }}:~/ml-project/
+        
+        # Copy Streamlit app code
+        scp -i ~/.ssh/oracle_key -r \
+          Dataset_1_UK_Housing/Code/streamlit_app.py \
+          ${{ secrets.ORACLE_USER }}@${{ secrets.ORACLE_HOST }}:~/ml-project/housing_app/
+        
+        scp -i ~/.ssh/oracle_key -r \
+          Dataset_2_UK_Historic_Electricity_Demand_Data/Code/streamlit_app.py \
+          ${{ secrets.ORACLE_USER }}@${{ secrets.ORACLE_HOST }}:~/ml-project/electricity_app/
+        
+        # SSH and deploy
+        ssh -i ~/.ssh/oracle_key ${{ secrets.ORACLE_USER }}@${{ secrets.ORACLE_HOST }} << 'ENDSSH'
+          cd ~/ml-project
+          
+          # Install Docker if not present
+          if ! command -v docker &> /dev/null; then
+            echo "📦 Installing Docker..."
+            curl -fsSL https://get.docker.com -o get-docker.sh
+            sudo sh get-docker.sh
+            sudo usermod -aG docker $USER
+            sudo systemctl enable docker
+            sudo systemctl start docker
+          fi
+          
+          # Install docker-compose if not present
+          if ! command -v docker-compose &> /dev/null; then
+            echo "📦 Installing docker-compose..."
+            sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+            sudo chmod +x /usr/local/bin/docker-compose
+          fi
+          
+          # Stop existing containers
+          docker-compose down || true
+          
+          # Build and start containers
+          echo "🐳 Building Docker images..."
+          docker-compose build
+          
+          echo "🚀 Starting containers..."
+          docker-compose up -d
+          
+          # Show status
+          docker-compose ps
+          
+          echo "✅ Deployment complete!"
+          echo "🌐 Housing App: http://${{ secrets.ORACLE_HOST }}:8501"
+          echo "⚡ Electricity App: http://${{ secrets.ORACLE_HOST }}:8502"
+        ENDSSH
+        
     - name: Deployment Summary
       run: |
         echo "🚀 DEPLOYMENT SUMMARY"
@@ -396,26 +463,16 @@ jobs:
         echo "  - Housing: Ridge Regression + Random Forest"
         echo "  - Electricity: XGBoost + Gradient Boosting"
         echo ""
-        echo "✅ Docker Images Built:"
-        echo "  - housing-prediction-app:latest"
-        echo "  - electricity-forecast-app:latest"
+        echo "✅ Docker Images Built & Deployed"
         echo ""
-        echo "📦 Deployment Options:"
-        echo "  1. Streamlit Community Cloud (Free)"
-        echo "  2. Docker Compose (Local)"
-        echo "  3. AWS EC2 / ECS"
-        echo "  4. Oracle Cloud (Free Tier)"
-        echo "  5. Raspberry Pi"
-        echo ""
-        echo "🌐 Next Steps:"
-        echo "  - Push Docker images to registry (optional)"
-        echo "  - Deploy to Streamlit Cloud via GitHub"
-        echo "  - Or run: docker-compose up -d"
+        echo "🌐 Live Applications:"
+        echo "  - Housing: http://${{ secrets.ORACLE_HOST }}:8501"
+        echo "  - Electricity: http://${{ secrets.ORACLE_HOST }}:8502"
         echo ""
         echo "✅ Pipeline Complete!"
 
   create-deployment-badge:
-    needs: [deploy-streamlit-apps]
+    needs: [deploy-to-oracle-cloud]
     runs-on: ubuntu-latest
     name: Update Deployment Status
     permissions:
