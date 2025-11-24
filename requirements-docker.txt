@@ -19,6 +19,9 @@ openpyxl>=3.0.0
 # ML libraries (lighter versions for deployment)
 scikit-learn>=1.4.0
 xgboost>=2.0.0
+tensorflow>=2.15.0
+prophet>=1.1.5
+joblib>=1.3.0
 
 # Utilities
 python-dateutil>=2.8.0

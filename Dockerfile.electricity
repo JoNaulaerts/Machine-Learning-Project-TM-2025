@@ -1,5 +1,5 @@
 # Dockerfile for UK Electricity Demand Forecasting App
-FROM python:3.11.9-slim
+FROM python:3.11-slim
 
 WORKDIR /app
 
@@ -16,8 +16,12 @@ RUN pip install --no-cache-dir --upgrade pip && \
 
 # Copy application code
 COPY Dataset_2_UK_Historic_Electricity_Demand_Data/Code/streamlit_app.py .
-# Note: Data files not included - mount them when running container
-# docker run -v ./Dataset_2_UK_Historic_Electricity_Demand_Data/Data:/app/Data electricity-app
+
+# Create Data directory for model files
+RUN mkdir -p /app/Data
+
+# Note: Data files (including models) mounted at runtime via docker-compose volume:
+# ./Dataset_2_UK_Historic_Electricity_Demand_Data/Data -> /app/Data
 
 # Expose Streamlit port
 EXPOSE 8502

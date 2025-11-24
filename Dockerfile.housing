@@ -14,11 +14,14 @@ COPY requirements-docker.txt .
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements-docker.txt
 
-# Copy application code and models
+# Copy application code
 COPY Dataset_1_UK_Housing/Code/streamlit_app.py .
-COPY Dataset_1_UK_Housing/Code/Models ./Models
-# Note: Data files not included - mount them when running container
-# docker run -v ./Dataset_1_UK_Housing/Data:/app/Data housing-app
+
+# Create Models directory
+RUN mkdir -p /app/Models /app/Data
+
+# Note: Data files mounted at runtime via docker-compose volume:
+# ./Dataset_1_UK_Housing/Data -> /app/Data
 
 # Expose Streamlit port
 EXPOSE 8501
