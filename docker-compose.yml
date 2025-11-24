@@ -8,6 +8,8 @@ services:
     container_name: uk-housing-predictor
     ports:
       - "8501:8501"
+    volumes:
+      - ./Dataset_1_UK_Housing/Data:/app/Data:ro
     environment:
       - PYTHONUNBUFFERED=1
     restart: unless-stopped
@@ -26,6 +28,8 @@ services:
     container_name: uk-electricity-forecaster
     ports:
       - "8502:8502"
+    volumes:
+      - ./Dataset_2_UK_Historic_Electricity_Demand_Data/Data:/app/Data:ro
     environment:
       - PYTHONUNBUFFERED=1
     restart: unless-stopped

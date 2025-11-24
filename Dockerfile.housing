@@ -13,10 +13,11 @@ RUN apt-get update && apt-get install -y \
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy application code and data
+# Copy application code and models
 COPY Dataset_1_UK_Housing/Code/streamlit_app.py .
 COPY Dataset_1_UK_Housing/Code/Models ./Models
-COPY Dataset_1_UK_Housing/Data/housing_features_final.parquet ./Data/
+# Note: Data files not included - mount them when running container
+# docker run -v ./Dataset_1_UK_Housing/Data:/app/Data housing-app
 
 # Expose Streamlit port
 EXPOSE 8501

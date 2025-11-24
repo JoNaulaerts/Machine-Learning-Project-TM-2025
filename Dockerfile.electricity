@@ -13,9 +13,10 @@ RUN apt-get update && apt-get install -y \
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy application code and data
+# Copy application code
 COPY Dataset_2_UK_Historic_Electricity_Demand_Data/Code/streamlit_app.py .
-COPY Dataset_2_UK_Historic_Electricity_Demand_Data/Data/neso_historic_demand_combined.csv ./Data/
+# Note: Data files not included - mount them when running container
+# docker run -v ./Dataset_2_UK_Historic_Electricity_Demand_Data/Data:/app/Data electricity-app
 
 # Expose Streamlit port
 EXPOSE 8502
