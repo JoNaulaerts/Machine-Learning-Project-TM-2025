@@ -1,5 +1,5 @@
 # Dockerfile for UK Electricity Demand Forecasting App
-FROM python:3.10-slim
+FROM python:3.11.9-slim
 
 WORKDIR /app
 
@@ -9,9 +9,10 @@ RUN apt-get update && apt-get install -y \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+# Copy requirements (using Docker-optimized version)
+COPY requirements-docker.txt .
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -r requirements-docker.txt
 
 # Copy application code
 COPY Dataset_2_UK_Historic_Electricity_Demand_Data/Code/streamlit_app.py .

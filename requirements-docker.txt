@@ -1,0 +1,26 @@
+# Streamlined requirements for Docker deployment
+# Pinned versions to avoid dependency resolution issues
+
+# Core dependencies (compatible versions)
+numpy>=1.24.0,<2.0.0
+pandas>=2.0.0,<3.0.0
+
+# Streamlit and visualization (main dependencies for apps)
+streamlit==1.51.0
+altair>=5.0.0
+plotly>=5.0.0
+matplotlib>=3.7.0,<4.0.0
+seaborn>=0.13.0
+
+# Data I/O
+pyarrow>=21.0.0
+openpyxl>=3.0.0
+
+# ML libraries (lighter versions for deployment)
+scikit-learn>=1.4.0
+xgboost>=2.0.0
+
+# Utilities
+python-dateutil>=2.8.0
+pytz>=2024.0
+pillow>=10.0.0
