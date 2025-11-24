@@ -3,7 +3,6 @@
 ## Team Members
 - **Jo Naulaerts** - Dataset 1 Models (Ridge, PyCaret)
 - **Abdul Salam Aldabik** - Dataset 2 Models, AWS, Deployment
-- **Amate** - [Contributions]
 
 ## Development Workflow
 
