@@ -252,7 +252,7 @@ Features:
 
 Team members:
 1. **Jo Naulaerts** - Dataset 1 contributions, Dataset 2 contributions
-2. **Abdul Salam Aldabik** - Dataset 1 contributions, Dataset 2 contribution
+2. **Abdul Salam Aldabik** - Dataset 1 contributions, Dataset 2 contribution, Deployment
 
 ---
 
