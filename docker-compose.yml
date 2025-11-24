@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  housing-app:
+    build:
+      context: .
+      dockerfile: Dockerfile.housing
+    container_name: uk-housing-predictor
+    ports:
+      - "8501:8501"
+    environment:
+      - PYTHONUNBUFFERED=1
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8501/_stcore/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - ml-network
+
+  electricity-app:
+    build:
+      context: .
+      dockerfile: Dockerfile.electricity
+    container_name: uk-electricity-forecaster
+    ports:
+      - "8502:8502"
+    environment:
+      - PYTHONUNBUFFERED=1
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8502/_stcore/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - ml-network
+
+networks:
+  ml-network:
+    driver: bridge
